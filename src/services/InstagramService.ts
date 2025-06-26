@@ -40,7 +40,7 @@ export class InstagramService {
           searchLimit: 1,
           resultsType: "details",
           resultsLimit: 1,
-          addParentData: false,
+          addParentData: true,
           enhanceUserSearchWithFacebookPage: false,
           isUserReelFeedURL: false,
           isUserTaggedFeedURL: false,
@@ -48,7 +48,8 @@ export class InstagramService {
           extendScraperFunction: "",
           customMapFunction: "",
           proxy: {
-            useApifyProxy: true
+            useApifyProxy: true,
+            apifyProxyGroups: ["RESIDENTIAL"]
           }
         })
       });
@@ -89,7 +90,7 @@ export class InstagramService {
         };
       }
 
-      // Handle legacy format with urlsFromSearch
+      // If no detailed data but URL exists, profile exists but limited info
       if (responseJson.urlsFromSearch && responseJson.urlsFromSearch.length > 0) {
         console.log('Found urlsFromSearch but no detailed data - profile exists but limited info');
         
