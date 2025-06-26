@@ -7,14 +7,17 @@ interface InstagramProfile {
 }
 
 interface ApifyResponse {
-  urlsFromSearch?: string[];
-  data?: {
-    items?: Array<{
-      username: string;
-      fullName?: string;
-      profilePicUrlHD?: string;
-    }>;
-  };
+  username?: string;
+  fullName?: string;
+  profilePicUrlHD?: string;
+  profilePicUrl?: string;
+  biography?: string;
+  followersCount?: number;
+  followingCount?: number;
+  postsCount?: number;
+  isPrivate?: boolean;
+  isVerified?: boolean;
+  url?: string;
 }
 
 export class InstagramService {
@@ -32,15 +35,21 @@ export class InstagramService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          addParentData: true,
+          search: cleanUsername,
+          searchType: "user",
+          searchLimit: 1,
+          resultsType: "details",
+          resultsLimit: 1,
+          addParentData: false,
           enhanceUserSearchWithFacebookPage: false,
           isUserReelFeedURL: false,
           isUserTaggedFeedURL: false,
-          resultsLimit: 1,
-          resultsType: "details",
-          search: cleanUsername,
-          searchLimit: 1,
-          searchType: "user"
+          extendOutputFunction: "",
+          extendScraperFunction: "",
+          customMapFunction: "",
+          proxy: {
+            useApifyProxy: true
+          }
         })
       });
 
@@ -52,71 +61,42 @@ export class InstagramService {
       console.log('=== RAW APIFY API RESPONSE ===');
       console.log('Full response:', JSON.stringify(responseJson, null, 2));
 
-      // The key fix: Apify returns an array, we need the first element
+      // Handle array response (most common format)
       if (Array.isArray(responseJson) && responseJson.length > 0) {
-        const profileData = responseJson[0];
+        const profileData = responseJson[0] as ApifyResponse;
         console.log('Profile data extracted from array:', profileData);
         
+        if (profileData.username) {
+          return {
+            username: profileData.username,
+            fullName: profileData.fullName || profileData.username,
+            profilePicUrlHD: profileData.profilePicUrlHD || profileData.profilePicUrl || '',
+            exists: true
+          };
+        }
+      }
+
+      // Handle object response with direct profile data
+      const profileData = responseJson as ApifyResponse;
+      if (profileData.username) {
+        console.log('Profile data found in object format:', profileData);
+        
         return {
-          username: profileData.username || cleanUsername,
-          fullName: profileData.fullName,
+          username: profileData.username,
+          fullName: profileData.fullName || profileData.username,
           profilePicUrlHD: profileData.profilePicUrlHD || profileData.profilePicUrl || '',
           exists: true
         };
       }
 
-      // Fallback for legacy format (object with urlsFromSearch and data.items)
-      const apifyResponse = responseJson as ApifyResponse;
-      
-      // Check if we have URLs from search (indicates profile exists)
-      if (apifyResponse.urlsFromSearch && apifyResponse.urlsFromSearch.length > 0) {
-        const instagramUrl = apifyResponse.urlsFromSearch[0];
-        console.log('Profile URL found:', instagramUrl);
-        
-        // Extract username from URL if possible
-        const urlUsername = instagramUrl.match(/instagram\.com\/([^\/]+)/)?.[1] || cleanUsername;
-        
-        // Check if we also have detailed profile data with profile picture
-        const items = apifyResponse.data?.items || [];
-        let profilePicUrlHD = '';
-        let fullName = urlUsername;
-        
-        if (items.length > 0) {
-          const profileData = items[0];
-          console.log('Profile data found:', profileData);
-          
-          // Extract profile picture URL - use profilePicUrlHD first, then profilePicUrl
-          if (profileData.profilePicUrlHD) {
-            profilePicUrlHD = profileData.profilePicUrlHD;
-            console.log('Profile picture URL extracted:', profilePicUrlHD);
-          }
-          
-          if (profileData.fullName) {
-            fullName = profileData.fullName;
-          }
-        }
-        
-        const finalProfile = {
-          username: urlUsername,
-          fullName: fullName,
-          profilePicUrlHD: profilePicUrlHD,
-          exists: true
-        };
-        
-        console.log('Final profile object being returned:', finalProfile);
-        return finalProfile;
-      }
-
-      // Fallback for legacy format
-      const items = apifyResponse.data?.items || [];
-      if (items.length > 0) {
-        const profileData = items[0];
-        console.log('Profile data found in legacy format:', profileData);
+      // Handle legacy format with urlsFromSearch
+      if (responseJson.urlsFromSearch && responseJson.urlsFromSearch.length > 0) {
+        console.log('Found urlsFromSearch but no detailed data - profile exists but limited info');
         
         return {
-          username: profileData.username || cleanUsername,
-          fullName: profileData.fullName,
-          profilePicUrlHD: profileData.profilePicUrlHD || '',
+          username: cleanUsername,
+          fullName: cleanUsername,
+          profilePicUrlHD: '',
           exists: true
         };
       }
