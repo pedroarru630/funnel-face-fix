@@ -1,5 +1,4 @@
 
-
 interface InstagramProfile {
   username: string;
   fullName?: string;
@@ -52,18 +51,6 @@ export class InstagramService {
       const responseJson = await response.json();
       console.log('=== RAW APIFY API RESPONSE ===');
       console.log('Full response:', JSON.stringify(responseJson, null, 2));
-      console.log('Response type:', typeof responseJson);
-      console.log('Is array?', Array.isArray(responseJson));
-      
-      if (Array.isArray(responseJson)) {
-        console.log('Response length:', responseJson.length);
-        if (responseJson.length > 0) {
-          console.log('First item:', JSON.stringify(responseJson[0], null, 2));
-          console.log('First item profilePicUrlHD:', responseJson[0].profilePicUrlHD);
-          console.log('First item username:', responseJson[0].username);
-          console.log('First item fullName:', responseJson[0].fullName);
-        }
-      }
 
       // The key fix: Apify returns an array, we need the first element
       if (Array.isArray(responseJson) && responseJson.length > 0) {
@@ -73,7 +60,7 @@ export class InstagramService {
         return {
           username: profileData.username || cleanUsername,
           fullName: profileData.fullName,
-          profilePicUrlHD: profileData.profilePicUrlHD || `https://www.instagram.com/${cleanUsername}/`,
+          profilePicUrlHD: profileData.profilePicUrlHD || profileData.profilePicUrl || '',
           exists: true
         };
       }
@@ -91,14 +78,14 @@ export class InstagramService {
         
         // Check if we also have detailed profile data with profile picture
         const items = apifyResponse.data?.items || [];
-        let profilePicUrlHD = `https://scontent-cdg4-1.cdninstagram.com/v/t51.2885-19/44884218_345707102882519_2446069589734326272_n.jpg?_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_cat=1&_nc_ohc=Yx4hrjVrjIsQ7kNvgGrTEdY&_nc_gid=bef4e65e5c2c4055bfb7e55c90e77d7e&edm=APs17CUBAAAA&ccb=7-5&oh=00_AYAawJlcHJQFKcDGz9xW4DH0bQkr2WOc8J6nqUOe2R_9XA&oe=67771FDA&_nc_sid=10d13b`;
+        let profilePicUrlHD = '';
         let fullName = urlUsername;
         
         if (items.length > 0) {
           const profileData = items[0];
           console.log('Profile data found:', profileData);
           
-          // Extract profile picture URL
+          // Extract profile picture URL - use profilePicUrlHD first, then profilePicUrl
           if (profileData.profilePicUrlHD) {
             profilePicUrlHD = profileData.profilePicUrlHD;
             console.log('Profile picture URL extracted:', profilePicUrlHD);
@@ -129,7 +116,7 @@ export class InstagramService {
         return {
           username: profileData.username || cleanUsername,
           fullName: profileData.fullName,
-          profilePicUrlHD: profileData.profilePicUrlHD || `https://scontent-cdg4-1.cdninstagram.com/v/t51.2885-19/44884218_345707102882519_2446069589734326272_n.jpg?_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_cat=1&_nc_ohc=Yx4hrjVrjIsQ7kNvgGrTEdY&_nc_gid=bef4e65e5c2c4055bfb7e55c90e77d7e&edm=APs17CUBAAAA&ccb=7-5&oh=00_AYAawJlcHJQFKcDGz9xW4DH0bQkr2WOc8J6nqUOe2R_9XA&oe=67771FDA&_nc_sid=10d13b`,
+          profilePicUrlHD: profileData.profilePicUrlHD || '',
           exists: true
         };
       }
@@ -138,7 +125,7 @@ export class InstagramService {
       return {
         username: cleanUsername,
         fullName: undefined,
-        profilePicUrlHD: `https://scontent-cdg4-1.cdninstagram.com/v/t51.2885-19/44884218_345707102882519_2446069589734326272_n.jpg?_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_cat=1&_nc_ohc=Yx4hrjVrjIsQ7kNvgGrTEdY&_nc_gid=bef4e65e5c2c4055bfb7e55c90e77d7e&edm=APs17CUBAAAA&ccb=7-5&oh=00_AYAawJlcHJQFKcDGz9xW4DH0bQkr2WOc8J6nqUOe2R_9XA&oe=67771FDA&_nc_sid=10d13b`,
+        profilePicUrlHD: '',
         exists: false
       };
       
@@ -147,10 +134,9 @@ export class InstagramService {
       return {
         username: username.replace('@', ''),
         fullName: undefined,
-        profilePicUrlHD: `https://scontent-cdg4-1.cdninstagram.com/v/t51.2885-19/44884218_345707102882519_2446069589734326272_n.jpg?_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_cat=1&_nc_ohc=Yx4hrjVrjIsQ7kNvgGrTEdY&_nc_gid=bef4e65e5c2c4055bfb7e55c90e77d7e&edm=APs17CUBAAAA&ccb=7-5&oh=00_AYAawJlcHJQFKcDGz9xW4DH0bQkr2WOc8J6nqUOe2R_9XA&oe=67771FDA&_nc_sid=10d13b`,
+        profilePicUrlHD: '',
         exists: false
       };
     }
   }
 }
-

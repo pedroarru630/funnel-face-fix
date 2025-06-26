@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
@@ -75,15 +76,17 @@ const ProfileConfirmation = () => {
           {/* Profile picture */}
           <div className="flex justify-center mb-6">
             <Avatar className="w-24 h-24">
-              <AvatarImage 
-                src={profileImage}
-                alt={displayName}
-                onLoad={() => console.log('ProfileConfirmation - Profile image loaded successfully:', profileImage)}
-                onError={(e) => {
-                  console.log('ProfileConfirmation - Profile image failed to load:', profileImage);
-                  console.log('ProfileConfirmation - Error details:', e);
-                }}
-              />
+              {profileImage && (
+                <AvatarImage 
+                  src={profileImage}
+                  alt={displayName}
+                  onLoad={() => console.log('ProfileConfirmation - Profile image loaded successfully:', profileImage)}
+                  onError={(e) => {
+                    console.log('ProfileConfirmation - Profile image failed to load:', profileImage);
+                    console.log('ProfileConfirmation - Error details:', e);
+                  }}
+                />
+              )}
               <AvatarFallback className="text-2xl bg-orange-100 text-orange-600">
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>

@@ -37,7 +37,7 @@ const MeuProprioPerfilFinalResults = () => {
   }
 
   const displayName = profileData.fullName || profileData.username;
-  const hasValidImage = profileData.profilePicUrlHD && profileData.profilePicUrlHD !== '/placeholder.svg';
+  const profileImage = profileData.profilePicUrlHD;
 
   return (
     <div className="min-h-screen bg-gray-200 flex flex-col">
@@ -52,9 +52,9 @@ const MeuProprioPerfilFinalResults = () => {
         <div className="bg-white rounded-3xl p-8 max-w-md mx-auto shadow-lg">
           <div className="flex justify-center mb-6">
             <Avatar className="w-24 h-24">
-              {hasValidImage && (
+              {profileImage && (
                 <AvatarImage 
-                  src={profileData.profilePicUrlHD} 
+                  src={profileImage} 
                   alt={displayName}
                   onError={(e) => {
                     console.log('Profile image failed to load, using fallback');

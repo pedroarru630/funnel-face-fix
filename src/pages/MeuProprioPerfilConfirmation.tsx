@@ -65,15 +65,17 @@ const MeuProprioPerfilConfirmation = () => {
           {/* Profile picture */}
           <div className="flex justify-center mb-6">
             <Avatar className="w-24 h-24">
-              <AvatarImage 
-                src={profileImage}
-                alt={displayName}
-                onLoad={() => console.log('MeuProprioPerfilConfirmation - Profile image loaded successfully')}
-                onError={(e) => {
-                  console.log('MeuProprioPerfilConfirmation - Profile image failed to load:', profileImage);
-                  console.log('MeuProprioPerfilConfirmation - Error details:', e);
-                }}
-              />
+              {profileImage && (
+                <AvatarImage 
+                  src={profileImage}
+                  alt={displayName}
+                  onLoad={() => console.log('MeuProprioPerfilConfirmation - Profile image loaded successfully')}
+                  onError={(e) => {
+                    console.log('MeuProprioPerfilConfirmation - Profile image failed to load:', profileImage);
+                    console.log('MeuProprioPerfilConfirmation - Error details:', e);
+                  }}
+                />
+              )}
               <AvatarFallback className="text-2xl bg-orange-100 text-orange-600">
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
